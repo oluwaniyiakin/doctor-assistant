@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Doctor Assistant</h1>
+  <form id="healthForm">
+    <input type="number" id="age" placeholder="Your Age" required />
+    <select id="sex">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+    <textarea id="symptoms" placeholder="Describe your symptoms..." required></textarea>
+    <button type="submit">Get Advice</button>
+  </form>
+  <div id="response"></div>
+
+  <script>
+    document.getElementById('healthForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const age = document.getElementById('age').value;
+      const sex = document.getElementById('sex').value;
+      const symptoms = document.getElementById('symptoms').value;
+
+      const res = await fetch('https://your-render-url.com/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ age, sex, symptoms }),
+      });
+      const data = await res.json();
+      document.getElementById('response').innerText = data.reply;
+    });
+  </script>
+</body>
+</html>
