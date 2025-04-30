@@ -6,16 +6,20 @@ const { OpenAI } = require("openai");
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Set up OpenAI
+// Root route
+app.get("/", (req, res) => {
+  res.send("Doctor Assistant API is running ✅");
+});
+
+// OpenAI setup
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Route
+// Main POST route
 app.post("/api/ask", async (req, res) => {
   const { prompt } = req.body;
 
@@ -30,11 +34,13 @@ app.post("/api/ask", async (req, res) => {
 
     const reply = chatCompletion.choices[0].message.content;
     res.json({ response: reply });
-  } catch (err) {
-    console.error("OpenAI API Error:", err);
-    res.status(500).json({ error: "Failed to generate response." });
+  } catch (error) {
+    console.error("OpenAI error:", error);
+    res.status(500).json({ error: "Something went wrong." });
   }
 });
 
 // Start server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
