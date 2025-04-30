@@ -3,37 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Doctor Assistant</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Doctor Assistant – AI Medical Help</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Doctor Assistant</h1>
-  <form id="healthForm">
-    <input type="number" id="age" placeholder="Your Age" required />
-    <select id="sex">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-    </select>
-    <textarea id="symptoms" placeholder="Describe your symptoms..." required></textarea>
-    <button type="submit">Get Advice</button>
-  </form>
-  <div id="response"></div>
+  <header>
+    <h1>🩺 Doctor Assistant</h1>
+    <p class="subtitle">
+      Get instant medical insights powered by AI. Enter your symptoms, age, and other details to receive personalized health advice. Always consult a real doctor for emergencies.
+    </p>
+  </header>
+
+  <main>
+    <section class="form-section">
+      <h2>Describe Your Symptoms</h2>
+      <form id="promptForm" aria-label="Doctor Assistant Form">
+        <label for="age">Your Age:</label>
+        <input type="number" id="age" name="age" min="1" max="120" required />
+
+        <label for="sex">Biological Sex:</label>
+        <select id="sex" name="sex" required>
+          <option value="">-- Select --</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="symptoms">Symptoms (describe in detail):</label>
+        <textarea id="symptoms" name="symptoms" rows="5" placeholder="E.g., Headache for 3 days, slight fever, fatigue..." required></textarea>
+
+        <button type="submit">Ask the Doctor Assistant</button>
+      </form>
+    </section>
+
+    <section id="responseBox" class="response hidden" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <p>Created by <strong>Oluwaniyi Akin</strong> &copy; <span id="year"></span>. All rights reserved.</p>
+  </footer>
 
   <script>
-    document.getElementById('healthForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const age = document.getElementById('age').value;
-      const sex = document.getElementById('sex').value;
-      const symptoms = document.getElementById('symptoms').value;
-
-      const res = await fetch('https://your-render-url.com/api/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ age, sex, symptoms }),
-      });
-      const data = await res.json();
-      document.getElementById('response').innerText = data.reply;
-    });
+    // Update footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
