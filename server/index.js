@@ -50,7 +50,7 @@ app.post('/ask', async (req, res) => {
 
 // Fallback route for homepage
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/../public/index.html');
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Start server
