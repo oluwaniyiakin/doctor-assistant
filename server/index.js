@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path'); // ✅ Fix: required for resolving static file paths
 const { OpenAI } = require('openai');
 require('dotenv').config();
 
@@ -12,7 +13,7 @@ const port = process.env.PORT || 5000;
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve files from /public
+app.use(express.static(path.join(__dirname, '../public'))); // ✅ Ensure correct relative path
 
 // Initialize OpenAI with API key from environment
 const openai = new OpenAI({
@@ -48,9 +49,9 @@ app.post('/ask', async (req, res) => {
   }
 });
 
-// Fallback route for homepage
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+// Fallback route for SPA support
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Start server
