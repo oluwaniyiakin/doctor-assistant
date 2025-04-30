@@ -2,7 +2,8 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { OpenAI } = require('openai'); // ✅ Correct way in v4+
+const { OpenAI } = require('openai');
+const path = require('path');
 require('dotenv').config();
 const cors = require('cors');
 
@@ -12,13 +13,14 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../public')));
 
-// ✅ Create OpenAI instance directly with the API key
+// OpenAI instance
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// API endpoint
 app.post('/ask', async (req, res) => {
   const { prompt } = req.body;
 
@@ -28,7 +30,7 @@ app.post('/ask', async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // ✅ Use chat model in v4+
+      model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -41,8 +43,9 @@ app.post('/ask', async (req, res) => {
   }
 });
 
+// Serve index.html
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.listen(port, () => {
