@@ -1,46 +1,57 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const { OpenAI } = require("openai");
+// server/index.js
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const { OpenAIApi, Configuration } = require('openai');
+require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+// Middleware
+app.use(cors());  // Enable CORS
+app.use(bodyParser.json());  // Parse incoming JSON requests
+app.use(express.static('public'));  // Serve static files from the 'public' folder
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("Doctor Assistant API is running ✅");
+// OpenAI API Configuration
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,  // Your OpenAI API Key
 });
 
-// OpenAI setup
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Instantiating the OpenAI API Client
+const openai = new OpenAIApi(configuration);
 
-// Main POST route
-app.post("/api/ask", async (req, res) => {
+// POST /ask endpoint to handle user requests
+app.post('/ask', async (req, res) => {
   const { prompt } = req.body;
 
+  if (!prompt || prompt.trim().length === 0) {
+    return res.status(400).json({ error: "Prompt is required." });
+  }
+
   try {
-    const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You are a helpful medical assistant." },
-        { role: "user", content: prompt },
-      ],
+    const completion = await openai.createCompletion({
+      model: "text-davinci-003",  // Or the appropriate model you're using
+      prompt: prompt,
+      max_tokens: 150,
     });
 
-    const reply = chatCompletion.choices[0].message.content;
-    res.json({ response: reply });
+    const aiResponse = completion.data.choices[0].text.trim();
+    res.json({ response: aiResponse });
+
   } catch (error) {
-    console.error("OpenAI error:", error);
-    res.status(500).json({ error: "Something went wrong." });
+    console.error('Error from OpenAI API:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request. Please try again later.' });
   }
+});
+
+// Root route to serve the index page
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
