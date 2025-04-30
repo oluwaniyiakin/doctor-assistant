@@ -2,7 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { OpenAIApi, Configuration } = require('openai');
+const { OpenAI } = require('openai'); // ✅ Correct way in v4+
 require('dotenv').config();
 const cors = require('cors');
 
@@ -10,19 +10,15 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());  // Enable CORS
-app.use(bodyParser.json());  // Parse incoming JSON requests
-app.use(express.static('public'));  // Serve static files from the 'public' folder
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-// OpenAI API Configuration
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,  // Your OpenAI API Key
+// ✅ Create OpenAI instance directly with the API key
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Instantiating the OpenAI API Client
-const openai = new OpenAIApi(configuration);
-
-// POST /ask endpoint to handle user requests
 app.post('/ask', async (req, res) => {
   const { prompt } = req.body;
 
@@ -31,27 +27,24 @@ app.post('/ask', async (req, res) => {
   }
 
   try {
-    const completion = await openai.createCompletion({
-      model: "text-davinci-003",  // Or the appropriate model you're using
-      prompt: prompt,
-      max_tokens: 150,
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // ✅ Use chat model in v4+
+      messages: [{ role: "user", content: prompt }],
     });
 
-    const aiResponse = completion.data.choices[0].text.trim();
+    const aiResponse = completion.choices[0].message.content.trim();
     res.json({ response: aiResponse });
 
   } catch (error) {
-    console.error('Error from OpenAI API:', error);
-    res.status(500).json({ error: 'An error occurred while processing your request. Please try again later.' });
+    console.error('OpenAI API error:', error);
+    res.status(500).json({ error: 'Failed to get response from AI.' });
   }
 });
 
-// Root route to serve the index page
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-// Start server
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`✅ Server is running at http://localhost:${port}`);
 });
